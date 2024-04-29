@@ -5,10 +5,14 @@ import json
 import time
 import hashlib
 import uuid
+import os
 
 API_ENDPOINT = "https://beacon-backend.app-assertai.com"
-DELAYED_FILE = "delayed.json"
-LOG_FILE = "status.log"
+# Get the current user's home directory
+user_home = os.path.expanduser("~")
+BEACON_DIR = os.path.join(user_home, "ALPHA", "BEACON")
+DELAYED_FILE = os.path.join(BEACON_DIR, "delayed.json")
+LOG_FILE = os.path.join(BEACON_DIR, "beacon.log")
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
