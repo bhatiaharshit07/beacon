@@ -1,49 +1,44 @@
 #!/bin/bash
 
-# Define user's home directory
-USER_HOME=/home/$(logname)
+# Automatically retrieve username
+USER=$(whoami)
 
-# Create folder ALPHA if it doesn't exist
-ALPHA_DIR=$USER_HOME/ALPHA
-if [ ! -d "$ALPHA_DIR" ]; then
-    mkdir -p "$ALPHA_DIR"
+# Warehouse ID provided as a command-line argument
+WAREHOUSE_ID="$1"
+
+# Step 1: Ensure directory /home/{user}/ALPHA/BEACON exists, create if not
+DIR="/home/$USER/ALPHA/BEACON"
+if [ ! -d "$DIR" ]; then
+    sudo mkdir -p "$DIR"
+    sudo chown -R "$USER:$USER" "$DIR"
 fi
 
-# Create folder beacon if it doesn't exist
-BEACON_DIR=$ALPHA_DIR/beacon
-if [ ! -d "$BEACON_DIR" ]; then
-    mkdir -p "$BEACON_DIR"
-fi
+# Step 2: Retrieve Python script from API and save to main.py
+MAIN_PY_URL="https://raw.githubusercontent.com/bhatiaharshit07/beacon/main/"
+sudo curl -o "$DIR/main.py" "$MAIN_PY_URL"
 
-# Fetch the content from the URL and create the Python file
-TOKEN=$1
-DEVICE_ID=$2
-curl -o $BEACON_DIR/main.py "https://beacon-backend.app-assertai.com/get_codes?token=$TOKEN&device_id=$DEVICE_ID"
-
-# Create the service file for autostart
-SERVICE_FILE=/etc/systemd/system/python_script.service
-echo "
-[Unit]
-Description=Your Python Script
+# Step 3: Create service file for main.py
+SERVICE_FILE="/etc/systemd/system/main.service"
+echo "[Unit]
+Description=Main Service
 After=network.target
 
 [Service]
-User=$(logname)
-WorkingDirectory=$BEACON_DIR
-ExecStart=/usr/bin/python3 $BEACON_DIR/main.py
+Type=simple
+ExecStart=/usr/bin/python3 $DIR/main.py
 Restart=always
 
 [Install]
-WantedBy=multi-user.target
-" > $SERVICE_FILE
+WantedBy=multi-user.target" | sudo tee "$SERVICE_FILE" > /dev/null
 
-# Set permissions for the Python file and service file
-chmod +x $BEACON_DIR/main.py
-chmod 644 $SERVICE_FILE
+# Step 5: Enable and start the service
+sudo systemctl daemon-reload
+sudo systemctl enable main.service
+sudo systemctl start main.service
 
-# Enable and start the service
-systemctl daemon-reload
-systemctl enable python_script.service
-systemctl start python_script.service
-
-echo "Setup completed successfully."
+# Step 6: Validation
+if [ -f "$DIR/device_details.json" ] && [ -f "$DIR/main.py" ] && [ -f "$SERVICE_FILE" ]; then
+    echo "Setup complete."
+else
+    echo "Setup failed."
+fi
