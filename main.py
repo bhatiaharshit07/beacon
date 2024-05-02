@@ -200,10 +200,10 @@ def main():
             beacon.check_and_update_device_details()
             lastUpdateTime = int(time.time())
         
-        if current_minute % 2 == 0: # Every 5 mins
+        if current_minute % 5 == 0: # Every 5 mins
             beacon.check_and_push_delayed_slots() 
 
-        if current_minute % 2 == 0: # Every 15 mins
+        if current_minute % 15 == 0: # Every 15 mins
             if beacon.get_device_status(startTime):
                 timeSlots[beacon.warehouseID] = [int(time.time())]
                 logging.info(f" {beacon.warehouseID} device is online for more than 10 mins in last 15 mins")
