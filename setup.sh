@@ -13,20 +13,19 @@ if [ ! -d "$DIR" ]; then
     sudo chown -R "$USER:$USER" "$DIR"
 fi
 
-# Step 2: Save warehouse ID to JSON file
-echo "{\"warehouseID\": \"$WAREHOUSE_ID\"}" | sudo tee "$DIR/warehouse_details.json" > /dev/null
-
-# Step 3: Retrieve Python script from API and save to main.py
-MAIN_PY_URL="https://raw.githubusercontent.com/bhatiaharshit07/beacon/main/main.py"
+# Step 2: Retrieve Python script from API and save to main.py
+MAIN_PY_URL="https://raw.githubusercontent.com/bhatiaharshit07/beacon/main/"
 sudo curl -o "$DIR/main.py" "$MAIN_PY_URL"
 
-# Step 4: Create service file for main.py
-SERVICE_FILE="/etc/systemd/system/beacon.service"
+# Step 3: Create service file for main.py
+SERVICE_FILE="/etc/systemd/system/main.service"
 echo "[Unit]
-Description=Beacon Service
+Description=Main Service
 After=network.target
 
 [Service]
+User=$USER
+Group=$USER
 Type=simple
 ExecStart=/usr/bin/python3 $DIR/main.py
 Restart=always
@@ -36,11 +35,11 @@ WantedBy=multi-user.target" | sudo tee "$SERVICE_FILE" > /dev/null
 
 # Step 5: Enable and start the service
 sudo systemctl daemon-reload
-sudo systemctl enable beacon.service
-sudo systemctl start beacon.service
+sudo systemctl enable main.service
+sudo systemctl start main.service
 
 # Step 6: Validation
-if [ -f "$DIR/warehouse_details.json" ] && [ -f "$DIR/main.py" ] && [ -f "$SERVICE_FILE" ]; then
+if [ -f "$DIR/device_details.json" ] && [ -f "$DIR/main.py" ] && [ -f "$SERVICE_FILE" ]; then
     echo "Setup complete."
 else
     echo "Setup failed."
