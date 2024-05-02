@@ -7,6 +7,7 @@ import time
 import cv2
 import logging
 from logging.handlers import RotatingFileHandler
+import subprocess
 
 class Beacon:
     def __init__(self):
@@ -83,7 +84,7 @@ class Beacon:
         else:
             self.update_device_details()
 
-    def check_cam_status(self, rtsp, timeout=5):
+    def check_cam_status2(self, rtsp, timeout=5):
         startTime = int(time.time())
         cap = cv2.VideoCapture(rtsp)
         logging.info(f"{cap.isOpened()} - {rtsp}")
@@ -92,6 +93,20 @@ class Beacon:
                 return True
             if time.time() - startTime > timeout or not cap.isOpened():
                 return False
+    
+    def check_cam_status(self, rtsp, timeout=5):
+        start_time = time.time()
+        cmd = ['ffprobe', '-v', 'error', '-select_streams', 'v:0', '-show_entries', 'stream=codec_name', '-of', 'default=noprint_wrappers=1:nokey=1', rtsp]
+        
+        while time.time() - start_time < timeout:
+            try:
+                subprocess.check_output(cmd)
+                return True
+            except subprocess.CalledProcessError:
+                pass  # Stream is not available yet, continue checking
+            time.sleep(0.1)  # Short sleep to avoid busy-waiting
+        
+        return False
     
     def get_cam_status(self):
         logging.info("Checking all the available cameras")
