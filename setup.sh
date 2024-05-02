@@ -17,7 +17,7 @@ fi
 echo "{\"warehouseID\": \"$WAREHOUSE_ID\"}" | sudo tee "$DIR/warehouse_details.json" > /dev/null
 
 # Step 3: Retrieve Python script from API and save to main.py
-MAIN_PY_URL="https://raw.githubusercontent.com/bhatiaharshit07/beacon/main/"
+MAIN_PY_URL="https://raw.githubusercontent.com/bhatiaharshit07/beacon/main/main.py"
 sudo curl -o "$DIR/main.py" "$MAIN_PY_URL"
 
 # Step 4: Create service file for main.py
