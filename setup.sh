@@ -13,11 +13,14 @@ if [ ! -d "$DIR" ]; then
     sudo chown -R "$USER:$USER" "$DIR"
 fi
 
-# Step 2: Retrieve Python script from API and save to main.py
+# Step 2: Save warehouse ID to JSON file
+echo "{\"warehouseID\": \"$WAREHOUSE_ID\"}" | sudo tee "$DIR/warehouse_details.json" > /dev/null
+
+# Step 3: Retrieve Python script from API and save to main.py
 MAIN_PY_URL="https://raw.githubusercontent.com/bhatiaharshit07/beacon/main/"
 sudo curl -o "$DIR/main.py" "$MAIN_PY_URL"
 
-# Step 3: Create service file for main.py
+# Step 4: Create service file for main.py
 SERVICE_FILE="/etc/systemd/system/main.service"
 echo "[Unit]
 Description=Main Service
@@ -37,7 +40,7 @@ sudo systemctl enable main.service
 sudo systemctl start main.service
 
 # Step 6: Validation
-if [ -f "$DIR/device_details.json" ] && [ -f "$DIR/main.py" ] && [ -f "$SERVICE_FILE" ]; then
+if [ -f "$DIR/warehouse_details.json" ] && [ -f "$DIR/main.py" ] && [ -f "$SERVICE_FILE" ]; then
     echo "Setup complete."
 else
     echo "Setup failed."
