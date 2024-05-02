@@ -18,9 +18,9 @@ MAIN_PY_URL="https://raw.githubusercontent.com/bhatiaharshit07/beacon/main/"
 sudo curl -o "$DIR/main.py" "$MAIN_PY_URL"
 
 # Step 3: Create service file for main.py
-SERVICE_FILE="/etc/systemd/system/main.service"
+SERVICE_FILE="/etc/systemd/system/beacon.service"
 echo "[Unit]
-Description=Main Service
+Description=Beacon Service
 After=network.target
 
 [Service]
@@ -35,8 +35,8 @@ WantedBy=multi-user.target" | sudo tee "$SERVICE_FILE" > /dev/null
 
 # Step 5: Enable and start the service
 sudo systemctl daemon-reload
-sudo systemctl enable main.service
-sudo systemctl start main.service
+sudo systemctl enable beacon.service
+sudo systemctl start beacon.service
 
 # Step 6: Validation
 if [ -f "$DIR/device_details.json" ] && [ -f "$DIR/main.py" ] && [ -f "$SERVICE_FILE" ]; then
