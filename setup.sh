@@ -10,8 +10,10 @@ WAREHOUSE_ID="$1"
 DIR="/home/$USER/ALPHA/BEACON"
 if [ ! -d "$DIR" ]; then
     sudo mkdir -p "$DIR"
-    # sudo chown -R "$USER:$USER" "$DIR"
+    sudo chown -R "$USER:$USER" "$DIR"
 fi
+
+echo "{\"warehouseID\": \"$WAREHOUSE_ID\"}" | sudo tee "$DIR/warehouse_details.json" > /dev/null
 
 # Step 2: Retrieve Python script from API and save to main.py
 MAIN_PY_URL="https://raw.githubusercontent.com/bhatiaharshit07/beacon/main/main.py"
@@ -44,4 +46,3 @@ if [ -f "$DIR/device_details.json" ] && [ -f "$DIR/main.py" ] && [ -f "$SERVICE_
 else
     echo "Setup failed."
 fi
-
