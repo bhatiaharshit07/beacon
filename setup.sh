@@ -10,7 +10,7 @@ WAREHOUSE_ID="$1"
 DIR="/home/$USER/ALPHA/BEACON"
 if [ ! -d "$DIR" ]; then
     sudo mkdir -p "$DIR"
-    sudo chown -R "$USER:$USER" "$DIR"
+    # sudo chown -R "$USER:$USER" "$DIR"
 fi
 
 # Step 2: Retrieve Python script from API and save to main.py
