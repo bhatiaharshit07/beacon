@@ -47,10 +47,10 @@ class Beacon:
     def transform_device_data(self, data):
         deviceData = {'deviceData':{}}
         for cameraData in data['deviceData']:
-            if len(cameraData['device_mac']) == 0:
+            if len(cameraData['device_local_IP']) == 0:
                 deviceData['deviceData'][cameraData['_id']] = f"rtsp://admin:Assert@123@{cameraData['device_ip']}:554/Streaming/Channels/{cameraData['device_channel']}02"
             else:
-                deviceData['deviceData'][cameraData['_id']] = f"rtsp://admin:Assert@123@{cameraData['device_ip']}:554/Streaming/Channels/{cameraData['device_mac']}02"
+                deviceData['deviceData'][cameraData['_id']] = f"rtsp://admin:Assert@123@{cameraData['device_local_IP']}:554/Streaming/Channels/{cameraData['device_channel']}02"
         logging.info(deviceData)
         return deviceData
 
@@ -61,6 +61,7 @@ class Beacon:
         response = requests.get(api_url)
         if response.status_code == 200:
             new_device_data = response.json().get('data', {})
+            print(new_device_data)
             final_device_data = self.transform_device_data(new_device_data)
             final_device_data['timestamp'] = int(time.time())
             with open(device_details_file, 'w') as file:
@@ -84,7 +85,7 @@ class Beacon:
         else:
             self.update_device_details()
 
-    def check_cam_status2(self, rtsp, timeout=5):
+    def check_cam_status(self, rtsp, timeout=5):
         startTime = int(time.time())
         cap = cv2.VideoCapture(rtsp)
         logging.info(f"{cap.isOpened()} - {rtsp}")
@@ -94,7 +95,8 @@ class Beacon:
             if time.time() - startTime > timeout or not cap.isOpened():
                 return False
     
-    def check_cam_status(self, rtsp, timeout=5):
+    def check_cam_status2(self, rtsp, timeout=5):
+        print(rtsp)
         start_time = time.time()
 
         while time.time() - start_time < timeout:
@@ -201,9 +203,10 @@ class Beacon:
 def main():
     beacon = Beacon()
     # Configure logging
-    LOG_FILE = beacon.beaconLogFileLocation
+    LOG_FILE = os.path.join(beacon.beaconFolderLocation, "status.log")
+    print(LOG_FILE)
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-    handler = RotatingFileHandler(LOG_FILE, maxBytes=3*1024*1024, backupCount=3)
+    handler = RotatingFileHandler(LOG_FILE, maxBytes=1*1024, backupCount=3)
     handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
     logging.getLogger('').addHandler(handler)
 
@@ -211,16 +214,17 @@ def main():
     lastUpdateTime = int(time.time())
     timeSlots = {}
     while True:
-        current_minute = time.localtime().tm_min
-
         if int(time.time()) - lastUpdateTime > 60*30: #60*60:
+            logging.info(f"Checking Device Status")
             beacon.check_and_update_device_details()
             lastUpdateTime = int(time.time())
         
-        if int(time.time()) % 5 * 60 == 0: # Every 5 mins
+        if int(time.time()) % (1 * 60) == 0: # Every 5 mins
+            logging.info(f"Checking for Delayed Slots")
             beacon.check_and_push_delayed_slots() 
 
-        if int(time.time()) % 15 * 60 == 0: # Every 15 mins
+        if int(time.time()) % (2 * 60) == 0: # Every 15 mins
+            logging.info(f"Checking Camera Status")
             if beacon.get_device_status(startTime):
                 timeSlots[beacon.warehouseID] = [int(time.time())]
                 logging.info(f" {beacon.warehouseID} device is online for more than 10 mins in last 15 mins")
@@ -234,6 +238,8 @@ def main():
                     beacon.save_slots_to_delayed_file(timeSlots)
             else:
                  logging.info("No slot found to push")
+        
+        time.sleep(1)
     
 if __name__=="__main__":
     main()
