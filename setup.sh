@@ -9,13 +9,13 @@ WAREHOUSE_ID="$1"
 # Step 1: Ensure directory /home/{user}/ALPHA/BEACON exists, create if not
 DIR="/home/$USER/ALPHA/BEACON"
 if [ ! -d "$DIR" ]; then
-    sudo mkdir -p "$DIR"
-    # sudo chown -R "$USER:$USER" "$DIR"
+    mkdir -p "$DIR"
+    # chown -R "$USER:$USER" "$DIR"
 fi
 
 # Step 2: Retrieve Python script from API and save to main.py
 MAIN_PY_URL="https://raw.githubusercontent.com/bhatiaharshit07/beacon/main/main.py"
-sudo curl -o "$DIR/main.py" "$MAIN_PY_URL"
+curl -o "$DIR/main.py" "$MAIN_PY_URL"
 
 # Step 3: Create service file for main.py
 SERVICE_FILE="/etc/systemd/system/beacon.service"
