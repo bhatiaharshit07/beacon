@@ -96,14 +96,14 @@ class Beacon:
     
     def check_cam_status(self, rtsp, timeout=5):
         start_time = time.time()
-        cmd = ['ffprobe', '-v', 'error', '-select_streams', 'v:0', '-show_entries', 'stream=codec_name', '-of', 'default=noprint_wrappers=1:nokey=1', rtsp]
-        
+
         while time.time() - start_time < timeout:
             try:
-                subprocess.check_output(cmd)
-                return True
-            except subprocess.CalledProcessError:
-                pass  # Stream is not available yet, continue checking
+                response = requests.get(rtsp, timeout=2)  # Adjust timeout as needed
+                if response.status_code == 200:
+                    return True
+            except requests.RequestException:
+                pass  # Connection error or timeout, continue checking
             time.sleep(0.1)  # Short sleep to avoid busy-waiting
         
         return False
