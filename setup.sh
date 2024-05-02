@@ -14,7 +14,7 @@ if [ ! -d "$DIR" ]; then
 fi
 
 # Step 2: Retrieve Python script from API and save to main.py
-MAIN_PY_URL="https://raw.githubusercontent.com/bhatiaharshit07/beacon/main/"
+MAIN_PY_URL="https://raw.githubusercontent.com/bhatiaharshit07/beacon/main/main.py"
 sudo curl -o "$DIR/main.py" "$MAIN_PY_URL"
 
 # Step 3: Create service file for main.py
