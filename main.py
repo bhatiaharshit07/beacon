@@ -9,11 +9,19 @@ import logging
 from logging.handlers import RotatingFileHandler
 import subprocess
 
+def set_file_permissions(filename):
+    try:
+        os.chmod(filename, 0o644)  # Give owner write permission
+        print(f"Permissions set successfully for {filename}")
+    except Exception as e:
+        print(f"Failed to set permissions for {filename}: {e}")
+
 class Beacon:
     def __init__(self):
         self.beaconFolderLocation = self.get_beacon_folder_location()
         self.beaconLogFileLocation = os.path.join(self.beaconFolderLocation, "status.log")
         self.warehouseID = self.get_warehouse_id()
+        logging.basicConfig(level=logging.INFO)
 
     def get_current_user(self):
         return getpass.getuser()
@@ -206,9 +214,10 @@ def main():
     LOG_FILE = os.path.join(beacon.beaconFolderLocation, "status.log")
     print(LOG_FILE)
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-    handler = RotatingFileHandler(LOG_FILE, maxBytes=1*1024, backupCount=3)
-    handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
-    logging.getLogger('').addHandler(handler)
+    # handler = RotatingFileHandler(LOG_FILE, maxBytes=1*1024, backupCount=3)
+    # handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+    # logging.getLogger('').addHandler(handler)
+    # set_file_permissions(LOG_FILE)
 
     startTime = int(time.time())
     lastUpdateTime = int(time.time())
@@ -228,8 +237,8 @@ def main():
             if beacon.get_device_status(startTime):
                 timeSlots[beacon.warehouseID] = [int(time.time())]
                 logging.info(f" {beacon.warehouseID} device is online for more than 10 mins in last 15 mins")
-            cameraSlots = beacon.get_cam_status()
-            timeSlots.update(cameraSlots)
+            #cameraSlots = beacon.get_cam_status()
+            #timeSlots.update(cameraSlots)
             if len(timeSlots) > 0:
                 if beacon.push_slots_to_api(timeSlots, live=True):
                     logging.info("Live Slots Pushed")
