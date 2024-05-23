@@ -66,6 +66,7 @@ class Beacon:
         api_url = f"https://backend.app-assertai.com/api/v1/get-camera-by-wh?warehouseID={self.warehouseID}"
         device_details_file = os.path.join(self.beaconFolderLocation, "device_details.json")
         response = requests.get(api_url)
+        print(response.json())
         if response.status_code == 200:
             new_device_data = response.json().get('data', {})
             print(new_device_data)
@@ -79,6 +80,7 @@ class Beacon:
         return response.text
     
     def check_and_update_device_details(self):
+        print("Updating Device Details")
         device_details_file = os.path.join(self.beaconFolderLocation, "device_details.json")
         if os.path.isfile(device_details_file):
             with open(device_details_file, 'r') as file:
