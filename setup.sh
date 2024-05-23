@@ -18,6 +18,8 @@ echo "{\"warehouseID\": \"$WAREHOUSE_ID\"}" | sudo tee "$DIR/warehouse_details.j
 # Step 2: Retrieve Python script from API and save to main.py
 MAIN_PY_URL="https://raw.githubusercontent.com/bhatiaharshit07/beacon/main/main.py"
 sudo curl -o "$DIR/main.py" "$MAIN_PY_URL"
+sudo chmod 755 "$DIR/main.py"
+#sudo chown -R "$USER:$USER" "$DIR"
 
 # Step 3: Create service file for main.py
 SERVICE_FILE="/etc/systemd/system/beacon.service"
@@ -39,6 +41,8 @@ WantedBy=multi-user.target" | sudo tee "$SERVICE_FILE" > /dev/null
 sudo systemctl daemon-reload
 sudo systemctl enable beacon.service
 sudo systemctl start beacon.service
+
+sleep 10
 
 # Step 6: Validation
 if [ -f "$DIR/device_details.json" ] && [ -f "$DIR/main.py" ] && [ -f "$SERVICE_FILE" ]; then
