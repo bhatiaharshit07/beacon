@@ -222,6 +222,7 @@ def main():
     startTime = int(time.time())
     lastUpdateTime = int(time.time())
     timeSlots = {}
+    beacon.check_and_update_device_details()
     while True:
         if int(time.time()) - lastUpdateTime > 60*1: #60*60:
             logging.info(f"Checking Device Status")
