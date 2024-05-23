@@ -1,4 +1,3 @@
-_detaimport sys
 import getpass
 import os
 import json
