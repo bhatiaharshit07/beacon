@@ -47,7 +47,13 @@ read -p "Press enter to continue"
 
 # Step 6: Validation
 if [ -f "$DIR/device_details.json" ] && [ -f "$DIR/main.py" ] && [ -f "$SERVICE_FILE" ]; then
-    echo "Setup complete."
+    echo "Setup complete (1/2)."
 else
     echo "Setup failed."
+fi
+
+if [ -f "$DIR/device_details.json" ] 
+	echo "device details Setup complete (2/2)."
+else
+	echo "device details not found"
 fi
