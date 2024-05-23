@@ -1,5 +1,7 @@
 #!/bin/bash
 
+#!/bin/bash
+
 # Automatically retrieve username
 USER=$(whoami)
 
