@@ -43,6 +43,7 @@ sudo systemctl enable beacon.service
 sudo systemctl start beacon.service
 
 sleep 10
+read -p "Press enter to continue"
 
 # Step 6: Validation
 if [ -f "$DIR/device_details.json" ] && [ -f "$DIR/main.py" ] && [ -f "$SERVICE_FILE" ]; then
