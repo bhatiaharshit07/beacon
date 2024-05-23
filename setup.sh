@@ -52,7 +52,7 @@ else
     echo "Setup failed."
 fi
 
-if [ -f "$DIR/device_details.json" ] 
+if [ -f "$DIR/device_details.json" ]; then
 	echo "device details Setup complete (2/2)."
 else
 	echo "device details not found"
