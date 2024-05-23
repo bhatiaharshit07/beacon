@@ -1,4 +1,4 @@
-import sys
+_detaimport sys
 import getpass
 import os
 import json
@@ -223,7 +223,7 @@ def main():
     lastUpdateTime = int(time.time())
     timeSlots = {}
     while True:
-        if int(time.time()) - lastUpdateTime > 60*30: #60*60:
+        if int(time.time()) - lastUpdateTime > 60*1: #60*60:
             logging.info(f"Checking Device Status")
             beacon.check_and_update_device_details()
             lastUpdateTime = int(time.time())
