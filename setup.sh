@@ -21,7 +21,7 @@ echo "{\"warehouseID\": \"$WAREHOUSE_ID\"}" | sudo tee "$DIR/warehouse_details.j
 MAIN_PY_URL="https://raw.githubusercontent.com/bhatiaharshit07/beacon/main/main.py"
 sudo curl -o "$DIR/main.py" "$MAIN_PY_URL"
 sudo chmod 755 "$DIR/main.py"
-#sudo chown -R "$USER:$USER" "$DIR"
+sudo chown -R "$USER:$USER" "$DIR"
 
 # Step 3: Create service file for main.py
 SERVICE_FILE="/etc/systemd/system/beacon.service"
