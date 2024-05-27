@@ -54,10 +54,11 @@ class Beacon:
     def transform_device_data(self, data):
         deviceData = {'deviceData':{}}
         for cameraData in data['deviceData']:
-            if len(cameraData['device_local_IP']) == 0:
-                deviceData['deviceData'][cameraData['_id']] = f"rtsp://admin:Assert@123@{cameraData['device_ip']}:554/Streaming/Channels/{cameraData['device_channel']}02"
-            else:
-                deviceData['deviceData'][cameraData['_id']] = f"rtsp://admin:Assert@123@{cameraData['device_local_IP']}:554/Streaming/Channels/{cameraData['device_channel']}02"
+            if 'device_local_IP' in cameraData:
+                if len(cameraData['device_local_IP']) == 0:
+                    deviceData['deviceData'][cameraData['_id']] = f"rtsp://admin:Assert@123@{cameraData['device_ip']}:554/Streaming/Channels/{cameraData['device_channel']}02"
+                else:
+                    deviceData['deviceData'][cameraData['_id']] = f"rtsp://admin:Assert@123@{cameraData['device_local_IP']}:554/Streaming/Channels/{cameraData['device_channel']}02"
         logging.info(deviceData)
         return deviceData
 
