@@ -20,7 +20,7 @@ class Beacon:
         self.beaconFolderLocation = self.get_beacon_folder_location()
         self.beaconLogFileLocation = os.path.join(self.beaconFolderLocation, "status.log")
         self.warehouseID = self.get_warehouse_id()
-        logging.basicConfig(level=logging.INFO)
+        # logging.basicConfig(level=print)
 
     def get_current_user(self):
         return getpass.getuser()
@@ -42,7 +42,7 @@ class Beacon:
         
     def get_warehouse_id(self):
         warehouseDetailsFile = os.path.join(self.beaconFolderLocation, "warehouse_details.json")
-        logging.info(f"Opening {warehouseDetailsFile}")
+        print(f"Opening {warehouseDetailsFile}")
         if os.path.isfile(warehouseDetailsFile):
             with open(warehouseDetailsFile, 'r') as file:
                 warehouseDetails = json.load(file)
@@ -59,7 +59,9 @@ class Beacon:
                     deviceData['deviceData'][cameraData['_id']] = f"rtsp://admin:Assert@123@{cameraData['device_ip']}:554/Streaming/Channels/{cameraData['device_channel']}02"
                 else:
                     deviceData['deviceData'][cameraData['_id']] = f"rtsp://admin:Assert@123@{cameraData['device_local_IP']}:554/Streaming/Channels/{cameraData['device_channel']}02"
-        logging.info(deviceData)
+            else:
+                deviceData['deviceData'][cameraData['_id']] = f"rtsp://admin:Assert@123@{cameraData['device_ip']}:554/Streaming/Channels/{cameraData['device_channel']}02"
+        print(deviceData)
         return deviceData
 
     
@@ -67,15 +69,17 @@ class Beacon:
         api_url = f"https://backend.app-assertai.com/api/v1/get-camera-by-wh?warehouseID={self.warehouseID}"
         device_details_file = os.path.join(self.beaconFolderLocation, "device_details.json")
         response = requests.get(api_url)
-        print(response.json())
+        # print(response.json())
         if response.status_code == 200:
             new_device_data = response.json().get('data', {})
             print(new_device_data)
             final_device_data = self.transform_device_data(new_device_data)
             final_device_data['timestamp'] = int(time.time())
+            print(final_device_data)
             with open(device_details_file, 'w') as file:
                 json.dump(final_device_data, file, indent=4)
-                logging.info("Device details updated successfully.")
+                print("DEVICE DETAILS UPDATED")
+                print("Device details updated successfully.")
         else:
             logging.error("Failed to fetch device details from API.")
         return response.text
@@ -84,21 +88,25 @@ class Beacon:
         print("Updating Device Details")
         device_details_file = os.path.join(self.beaconFolderLocation, "device_details.json")
         if os.path.isfile(device_details_file):
+            print("found device_details json file")
             with open(device_details_file, 'r') as file:
                 device_details = json.load(file)
             timestamp = device_details.get('timestamp', 0)
+            print(timestamp)
             current_time = int(time.time())
-            if current_time - timestamp > 86400:  # Check if more than 1 day has passed (86400 seconds)
+            if current_time - timestamp > 86400: 
+                print("more than 1 day pasee") # Check if more than 1 day has passed (86400 seconds)
                 self.update_device_details()
             else:
-                logging.info("Device details were updated less than 1 day ago.")
+                print("NOT UPDATING")
+                print("Device details were updated less than 1 day ago.")
         else:
             self.update_device_details()
 
     def check_cam_status(self, rtsp, timeout=5):
         startTime = int(time.time())
         cap = cv2.VideoCapture(rtsp)
-        logging.info(f"{cap.isOpened()} - {rtsp}")
+        print(f"{cap.isOpened()} - {rtsp}")
         while True:
             if cap.isOpened():
                 return True
@@ -121,7 +129,7 @@ class Beacon:
         return False
     
     def get_cam_status(self):
-        logging.info("Checking all the available cameras")
+        print("Checking all the available cameras")
         device_details_file = os.path.join(self.beaconFolderLocation, "device_details.json")
         if not os.path.isfile(device_details_file):
             self.check_and_update_device_details()
@@ -129,10 +137,10 @@ class Beacon:
         with open(device_details_file, 'r') as file:
                 device_details = json.load(file)
         currentTime = int(time.time())
-        logging.info(currentTime)
+        print(currentTime)
         for cameraData in device_details['deviceData']:
             if self.check_cam_status(device_details['deviceData'][cameraData]):
-                logging.info(cameraData)
+                print(cameraData)
                 cameraSlot[cameraData] = [currentTime]
         
         return cameraSlot
@@ -144,7 +152,7 @@ class Beacon:
     def save_slots_to_delayed_file(self, timeSlots):
         delayedFile = os.path.join(self.beaconFolderLocation, "delayed.json")
         if os.path.isfile(delayedFile):
-            logging.info("Delayed file found")
+            print("Delayed file found")
         else:
             with open(delayedFile, "w") as json_file:
                 json.dump({}, json_file)
@@ -154,7 +162,7 @@ class Beacon:
         if len(device_details) == 0:
             final_slots = timeSlots
         else:
-            logging.info(f"Found Previous slots in delayed file: {device_details}")
+            print(f"Found Previous slots in delayed file: {device_details}")
             for id in timeSlots:
                 if id in device_details:
                     device_details[id].append(timeSlots[id][0]) 
@@ -162,7 +170,7 @@ class Beacon:
                     device_details[id] = timeSlots[id]
             final_slots = device_details
         with open(delayedFile, "w") as json_file:
-            logging.info(f"Pushing final slot to delayed file {final_slots}")
+            print(f"Pushing final slot to delayed file {final_slots}")
             json.dump(final_slots, json_file)
 
     def push_slots_to_api(self, slots, live):
@@ -173,7 +181,7 @@ class Beacon:
         "WAREHOUSE_ID": self.warehouseID,
         "PROJECT_ID": "66065de7f49aa74f9a63dd39"
         })
-        logging.info(payload)
+        print(payload)
         headers = {
             'accept': 'application/json',
             'Content-Type': 'application/json'
@@ -181,7 +189,7 @@ class Beacon:
         try:
             response = requests.request("POST", url, headers=headers, data=payload)
             if response.status_code == 200:
-                logging.info("API request successful")
+                print("API request successful")
                 return True
             else:
                 logging.error(f"API request failed with status code: {response.status_code}")
@@ -200,13 +208,13 @@ class Beacon:
                 slots = json.load(file)
                 if len(slots) > 0:
                     if self.push_slots_to_api(slots, live=False):
-                        logging.info("Clearing all the delayed slots and successful push")
+                        print("Clearing all the delayed slots and successful push")
                         with open(delayedFile, "w") as json_file:
                             json.dump({}, json_file)
                     else:
                         logging.error("Unable to push delayed slots")
                 else:
-                    logging.info("No delayed slots found")
+                    print("No delayed slots found")
         except json.JSONDecodeError as jde:
             logging.error(f"Error decoding JSON from file '{delayedFile}': {jde}")
 
@@ -215,7 +223,7 @@ def main():
     # Configure logging
     LOG_FILE = os.path.join(beacon.beaconFolderLocation, "status.log")
     print(LOG_FILE)
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+    # logging.basicConfig(level=print, format='%(asctime)s - %(levelname)s - %(message)s')
     # handler = RotatingFileHandler(LOG_FILE, maxBytes=1*1024, backupCount=3)
     # handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
     # logging.getLogger('').addHandler(handler)
@@ -226,32 +234,36 @@ def main():
     timeSlots = {}
     beacon.check_and_update_device_details()
     while True:
-        if int(time.time()) - lastUpdateTime > 60*1: #60*60:
-            logging.info(f"Checking Device Status")
+        if int(time.time()) - lastUpdateTime > 60*1:
+            print("Checking Device Status") #60*60:
+            print(f"Checking Device Status")
             beacon.check_and_update_device_details()
             lastUpdateTime = int(time.time())
         
         if int(time.time()) % (1 * 60) == 0: # Every 5 mins
-            logging.info(f"Checking for Delayed Slots")
+            print(f"Checking for Delayed Slots")
+            print(f"Checking for Delayed Slots")
             beacon.check_and_push_delayed_slots() 
 
-        if int(time.time()) % (2 * 60) == 0: # Every 15 mins
-            logging.info(f"Checking Camera Status")
+        if int(time.time()) % (1* 60) == 0: # Every 15 mins
+            print(f"Checking Camera Status")
+            print(f"Checking Camera Status")
             if beacon.get_device_status(startTime):
                 timeSlots[beacon.warehouseID] = [int(time.time())]
-                logging.info(f" {beacon.warehouseID} device is online for more than 10 mins in last 15 mins")
+                print(f" {beacon.warehouseID} device is online for more than 10 mins in last 15 mins")
             #cameraSlots = beacon.get_cam_status()
             #timeSlots.update(cameraSlots)
             if len(timeSlots) > 0:
                 if beacon.push_slots_to_api(timeSlots, live=True):
-                    logging.info("Live Slots Pushed")
+                    print("Live Slots Pushed")
                 else:
                     logging.error(f"Unable to push live slots: {timeSlots}")
                     beacon.save_slots_to_delayed_file(timeSlots)
             else:
-                 logging.info("No slot found to push")
+                 print("No slot found to push")
         
         time.sleep(1)
     
 if __name__=="__main__":
+    # print("STARTED")
     main()
