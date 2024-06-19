@@ -174,7 +174,7 @@ class Beacon:
             json.dump(final_slots, json_file)
 
     def push_slots_to_api(self, slots, live):
-        url = "http://34.131.49.157:8000/process_data"
+        url = "http://beacon-data.app-assertai.com:8000/process_data"
         payload = json.dumps({
         "TIME_SLOTS": slots,
         "LIVE": live,
